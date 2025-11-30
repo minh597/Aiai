@@ -1,8 +1,8 @@
 let items = []; // Lưu data tạm trong RAM
-const API_KEY = "minh123"; // API key của bạn
+const API_KEY = "minh123";
 
 export default function handler(req, res) {
-  const key = req.headers["x-api-key"] || req.query.apikey; // Check header hoặc query
+  const key = req.headers["x-api-key"] || req.query.apikey;
 
   // Kiểm tra API key
   if (key !== API_KEY) {
@@ -12,23 +12,25 @@ export default function handler(req, res) {
   const { method } = req;
 
   // ================== GET ==================
-  // Lấy danh sách items
   if (method === "GET") {
     return res.status(200).json({ items });
   }
 
   // ================== POST ==================
-  // Thêm item mới
   if (method === "POST") {
-    const { name } = req.body;
+    const { name, quantity, price, description, image } = req.body;
 
-    if (!name) {
-      return res.status(400).json({ error: "Missing name" });
+    if (!name || quantity == null || price == null) {
+      return res.status(400).json({ error: "Missing required fields (name, quantity, price)" });
     }
 
     const newItem = {
       id: items.length + 1,
       name,
+      quantity,
+      price,
+      description: description || "",
+      image: image || ""
     };
 
     items.push(newItem);
@@ -37,23 +39,22 @@ export default function handler(req, res) {
   }
 
   // ================== DELETE ==================
-  // Xóa item theo id
   if (method === "DELETE") {
     const { id } = req.body;
 
-    if (!id) {
-      return res.status(400).json({ error: "Missing item id" });
+    if (id != null) {
+      // Xoá theo id
+      const index = items.findIndex(i => i.id === id);
+      if (index === -1) {
+        return res.status(404).json({ error: "Item not found" });
+      }
+      const deleted = items.splice(index, 1);
+      return res.status(200).json({ message: "Deleted", item: deleted[0] });
+    } else {
+      // Xoá tất cả
+      items = [];
+      return res.status(200).json({ message: "All items deleted" });
     }
-
-    const index = items.findIndex(i => i.id === id);
-
-    if (index === -1) {
-      return res.status(404).json({ error: "Item not found" });
-    }
-
-    const deleted = items.splice(index, 1);
-
-    return res.status(200).json({ message: "Deleted", item: deleted[0] });
   }
 
   // Method khác → không cho
