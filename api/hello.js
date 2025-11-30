@@ -1,9 +1,8 @@
 let items = []; // Lưu data tạm trong RAM
-
 const API_KEY = "minh123"; // API key của bạn
 
 export default function handler(req, res) {
-  const key = req.headers["x-api-key"];
+  const key = req.headers["x-api-key"] || req.query.apikey; // Check header hoặc query
 
   // Kiểm tra API key
   if (key !== API_KEY) {
@@ -12,13 +11,13 @@ export default function handler(req, res) {
 
   const { method } = req;
 
-  // =============== GET ===============
+  // ================== GET ==================
   // Lấy danh sách items
   if (method === "GET") {
     return res.status(200).json({ items });
   }
 
-  // =============== POST ===============
+  // ================== POST ==================
   // Thêm item mới
   if (method === "POST") {
     const { name } = req.body;
@@ -37,7 +36,7 @@ export default function handler(req, res) {
     return res.status(201).json({ message: "Added", item: newItem });
   }
 
-  // =============== DELETE ===============
+  // ================== DELETE ==================
   // Xóa item theo id
   if (method === "DELETE") {
     const { id } = req.body;
